@@ -29,7 +29,14 @@ REFERENCES USED
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println(Api.fetch("https://apiv2.bitcoinaverage.com/indices/global/ticker/BTCUSD"));
+
+        Crypto coinData_obj = new Crypto();
+
+        String coinData_string = Api.fetch("https://apiv2.bitcoinaverage.com/indices/global/ticker/BTCUSD");
+        //System.out.println(coinData_string);
+
+        coinData_obj.parseData(coinData_string);
+
         //System.out.println(Api.fetch("https://apiv2.bitcoinaverage.com/symbols/indices/ticker"));
     }
 }

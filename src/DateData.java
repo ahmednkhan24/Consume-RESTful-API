@@ -23,26 +23,6 @@ public class DateData {
         hour = day = week = month = month_3 = month_6 = year = -1;
     }
 
-    public DateData(double day, double week, double month) {
-        isInDepth  = false;
-        this.day   = day;
-        this.week  = week;
-        this.month = month;
-
-        hour = month_3 = month_6 = year = -1;
-    }
-
-    public DateData(double hour, double day, double week, double month, double month_3, double month_6, int year) {
-        isInDepth    = true;
-        this.hour    = hour;
-        this.day     = day;
-        this.week    = week;
-        this.month   = month;
-        this.month_3 = month_3;
-        this.month_6 = month_6;
-        this.year    = year;
-    }
-
     // getters
     public double getHour() {
         return hour;

@@ -1,132 +1,242 @@
+/*
+ * Crypto.java
+ * Object class to model all possible crypto-currencies received by an API
+ *
+ * Crypto's that are supported in this application:
+ *      BitCoin  - BTC
+ *      LiteCoin - LTC
+ *
+ *
+ * Currencies that are supported in this application:
+ *      US Dollar         - USD
+ *      Euro              - EUR
+ *      British Pound     - GBP
+ *      Australian Dollar - AUD
+ *      Japanese Yen      - JPY
+ *      Chinese Yuan      - CNY
+ *      Saudi Riyal       - SAR
+ */
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Crypto {
-
+    private String rawJson;
+    private String priceSymbol;
+    private String timestamp;
+    private String display_timestamp;
     private double ask;
     private double bid;
     private double last;
     private double high;
     private double low;
-    private double openDay;
     private double volume;
-    private double dpriceChange;
-    private double wpriceChange;
-    private double mpriceChange;
-    private double ypriceChange;
-    private String timestamp;
+    private double volumePercent;
+    private DateData open;
+    private DateData averages;
+    private DateData priceChanges;
+    private DateData percentChanges;
 
-        public void parseData(String apiResponse) {
+    public Crypto(String priceSymbol) {
+        this.priceSymbol = priceSymbol;
+
+        ask = bid = last = high = low = volume = volumePercent = 0;
+        open = new DateData();
+        averages = new DateData();
+        priceChanges = new DateData();
+        percentChanges = new DateData();
+
+        updateData();
+    }
+
+    // getters
+    public String getRawJson() {
+        return rawJson;
+    }
+
+    public String getPriceSymbol() {
+        return priceSymbol;
+    }
+
+    public String getDisplay_timestamp() {
+        return display_timestamp;
+    }
+
+    public double getAsk() {
+        return ask;
+    }
+
+    public double getBid() {
+        return bid;
+    }
+
+    public double getLast() {
+        return last;
+    }
+
+    public double getHigh() {
+        return high;
+    }
+
+    public double getLow() {
+        return low;
+    }
+
+    public double getVolume() {
+        return volume;
+    }
+
+    public double getVolumePercent() {
+        return volumePercent;
+    }
+
+    public DateData getOpen() {
+        return open;
+    }
+
+    public DateData getAverages() {
+        return averages;
+    }
+
+    public DateData getPriceChanges() {
+        return priceChanges;
+    }
+
+    public DateData getPercentChanges() {
+        return percentChanges;
+    }
+
+    // setters
+    public void setRawJson(String rawJson) {
+        this.rawJson = rawJson;
+    }
+
+    public void setPriceSymbol(String priceSymbol) {
+        this.priceSymbol = priceSymbol.toUpperCase();
+        updateData();
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setDisplay_timestamp(String display_timestamp) {
+        this.display_timestamp = display_timestamp;
+    }
+
+    public void setAsk(double ask) {
+        this.ask = ask;
+    }
+
+    public void setBid(double bid) {
+        this.bid = bid;
+    }
+
+    public void setLast(double last) {
+        this.last = last;
+    }
+
+    public void setHigh(double high) {
+        this.high = high;
+    }
+
+    public void setLow(double low) {
+        this.low = low;
+    }
+
+    public void setVolume(double volume) {
+        this.volume = volume;
+    }
+
+    public void setVolumePercent(double volumePercent) {
+        this.volumePercent = volumePercent;
+    }
+
+    private void updateData() {
+        // create the url for the endpoint and call the api using it
+        String endpoint = "https://apiv2.bitcoinaverage.com/indices/global/ticker/" + getPriceSymbol();
+        String apiResponse = Api.fetch(endpoint);
+
+        // parse the JSON data received from the api
         try {
             JSONObject obj = new JSONObject(apiResponse);
+            setRawJson(apiResponse);
 
-            if (obj.has("ask")) {
-                ask = obj.getDouble("ask");
-
-                //TODO delete this print statement
-                System.out.println("Ask: " + ask);
-            }
-
-            if (obj.has("bid")) {
-                bid = obj.getDouble("bid");
-
-                //TODO delete this print statement
-                System.out.println("Bid: " + bid);
-            }
-
-            if (obj.has("last")) {
-                last = obj.getDouble("last");
-
-                //TODO delete this print statement
-                System.out.println("Last: " + last);
-            }
-
-            // High price for the day
-            if (obj.has("high")) {
-                high = obj.getDouble("high");
-
-                //TODO delete this print statement
-                System.out.println("High: " + high);
-            }
-
-            // Low price for the day
-            if (obj.has("low")) {
-                low = obj.getDouble("low");
-
-                //TODO delete this print statement
-                System.out.println("Low: " + low);
-            }
-
-            // Opening prices for hour, day, week, and year for the
-            // crypto currency that is currently selected
-            if (obj.has("open")) {
-
-                // TODO: We probably only want the opening price for the day not the other one's
-                openDay = obj.getJSONObject("open").getDouble("day");
-
-                double openWeek = obj.getJSONObject("open").getDouble("week");
-                double openMonth = obj.getJSONObject("open").getDouble("month");
-                double openYear = obj.getJSONObject("open").getDouble("year");
-
-                //TODO delete this print statement
-                System.out.println("OPEN -> DAY: " + openDay + "  Week: " + openWeek + "  Month: " + openMonth + "  Year: " + openYear);
-            }
-
-            // Average prices for day, week, and month for the
-            // crypto currency that is currently selected
-            if (obj.has("averages")) {
-                double avgDay = obj.getJSONObject("averages").getDouble("day");
-                double avgWeek = obj.getJSONObject("averages").getDouble("week");
-                double avgMonth = obj.getJSONObject("averages").getDouble("month");
-
-                //TODO delete this print statement
-                System.out.println("Average -> DAY: " + avgDay + "  Week: " + avgWeek + "  Month: " + avgMonth);
-
-            }
-
-            // Volume of the crypto currency
-            if (obj.has("volume")) {
-                volume = obj.getDouble("volume");
-
-                //TODO delete this print statement
-                System.out.println("Volume: " + volume);
-            }
-
-            // Changes in price for the selected crypto currency from the
-            // given day, week, month, and year.
+            if (obj.has("ask"))
+                setAsk(obj.getDouble("ask"));
+            if (obj.has("bid"))
+                setBid(obj.getDouble("bid"));
+            if (obj.has("last"))
+                setLast(obj.getDouble("last"));
+            if (obj.has("high"))
+                setHigh(obj.getDouble("high"));
+            if (obj.has("low"))
+                setLow(obj.getDouble("low"));
+            if (obj.has("volume"))
+                setVolume(obj.getDouble("volume"));
+            if (obj.has("volume_percent"))
+                setVolumePercent(obj.getDouble("volume_percent"));
+            if (obj.has("timestamp"))
+                setTimestamp(Double.toString(obj.getDouble("timestamp")));
+            if (obj.has("display_timestamp"))
+                setDisplay_timestamp(obj.getString("display_timestamp"));
+            if (obj.has("open"))
+                open.updateData(obj.getJSONObject("open"));
+            if (obj.has("averages"))
+                averages.updateData(obj.getJSONObject("averages"));
             if (obj.has("changes")) {
-                dpriceChange = obj.getJSONObject("changes").getJSONObject("price").getDouble("day");
-                wpriceChange = obj.getJSONObject("changes").getJSONObject("price").getDouble("week");
-                mpriceChange = obj.getJSONObject("changes").getJSONObject("price").getDouble("month");
-                ypriceChange = obj.getJSONObject("changes").getJSONObject("price").getDouble("year");
+                JSONObject changes = obj.getJSONObject("changes");
 
-
-                //TODO delete this print statement
-                System.out.println("Changes -> DAY: " + dpriceChange + "  Week: " + wpriceChange + "  Month: " + mpriceChange + "  Year: " + ypriceChange);
+                if (changes.has("price"))
+                    priceChanges.updateData(changes.getJSONObject("price"));
+                if (changes.has("percent"))
+                    percentChanges.updateData(changes.getJSONObject("percent"));
             }
-
-            // TODO we don't need this.....I think
-
-            if (obj.has("volume_percent")) {
-                //System.out.println("VOLUME_PERCENT");
-            }
-
-            // TODO we don't need this.....I think
-            if (obj.has("timestamp")) {
-               //System.out.println("TIMESTAMP");
-            }
-
-            // Display time for when data was pulled
-            if (obj.has("display_timestamp")) {
-                timestamp = obj.getString("display_timestamp");
-
-                //TODO delete this print statement
-                System.out.println("Timestamp: " + timestamp);
-            }
-
         }
         catch (JSONException e) {
+            System.out.println("JSONException: Crypto.parseData()");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Price Symbol: " + getPriceSymbol());
+        sb.append("\n");
+        sb.append("Timestamp: " + getDisplay_timestamp());
+        sb.append("\n");
+        sb.append("Ask: " + getAsk());
+        sb.append("\n");
+        sb.append("Bid: " + getBid());
+        sb.append("\n");
+        sb.append("Last: " + getLast());
+        sb.append("\n");
+        sb.append("High: " + getHigh());
+        sb.append("\n");
+        sb.append("Low: " + getLow());
+        sb.append("\n");
+        sb.append("Volume: " + getVolume());
+        sb.append("\n");
+        sb.append("Volume Percent: " + getVolumePercent());
+        sb.append("\n");
+        sb.append("Open:");
+        sb.append("\n");
+        sb.append(getOpen().toString());
+        sb.append("\n");
+        sb.append("Averages:");
+        sb.append("\n");
+        sb.append(getAverages().toString());
+        sb.append("\n");
+        sb.append("Price Changes:");
+        sb.append("\n");
+        sb.append(getPriceChanges().toString());
+        sb.append("\n");
+        sb.append("Percent Changes:");
+        sb.append("\n");
+        sb.append(getPercentChanges().toString());
+
+        return sb.toString();
     }
 }

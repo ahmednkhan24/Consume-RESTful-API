@@ -29,14 +29,11 @@ REFERENCES USED
 public class Main {
 
     public static void main(String[] args) {
+        Crypto bitcoinUS = new Crypto("BTCUSD");
+        Crypto litecoinUS = new Crypto("LTCUSD");
 
-        Crypto coinData_obj = new Crypto();
-
-        String coinData_string = Api.fetch("https://apiv2.bitcoinaverage.com/indices/global/ticker/BTCUSD");
-        //System.out.println(coinData_string);
-
-        coinData_obj.parseData(coinData_string);
-
-        //System.out.println(Api.fetch("https://apiv2.bitcoinaverage.com/symbols/indices/ticker"));
+        System.out.println(bitcoinUS.toString());
+        System.out.println();
+        System.out.println(litecoinUS.toString());
     }
 }

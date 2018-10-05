@@ -1,5 +1,6 @@
 /*
-    Api.java
+ * Api.java
+ * Class only contains 1 static method, therefore calling a constructor is unnecessary
  */
 
 import java.io.BufferedReader;
@@ -33,7 +34,6 @@ public class Api {
             // clean the data received from the API by turning it into a String
             BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
             apiResponse = br.lines().collect(Collectors.joining(System.lineSeparator()));
-            //System.out.println(apiResponse);
 
             conn.disconnect();
 

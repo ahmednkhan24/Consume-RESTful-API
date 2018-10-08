@@ -1,6 +1,7 @@
 /*
  * HistoricalData.java
  * Object class to model all possible historical data values received by an API
+ * test
  */
 
 public class HistoricalData {

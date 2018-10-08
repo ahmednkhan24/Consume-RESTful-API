@@ -20,10 +20,12 @@
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Crypto {
+    private static final String BASE_URL = "https://apiv2.bitcoinaverage.com/indices/global/";
     private String rawJson;
     private String priceSymbol;
     private String timestamp;
@@ -41,7 +43,7 @@ public class Crypto {
     private DateData percentChanges;
     private ArrayList <HistoricalData> dailyHistory;
     private ArrayList <HistoricalData> monthlyHistory;
-    private ArrayList <HistoricalData> alltimeHistory;
+    private ArrayList <HistoricalData> allTimeHistory;
 
 
     public Crypto(String priceSymbol) {
@@ -54,13 +56,9 @@ public class Crypto {
         percentChanges = new DateData();
         dailyHistory = new ArrayList<HistoricalData>();
         monthlyHistory = new ArrayList<HistoricalData>();
-        alltimeHistory = new ArrayList<HistoricalData>();
+        allTimeHistory = new ArrayList<HistoricalData>();
 
-        //TODO DELETE ME LATTER
         updateData();
-        updateDailyHistory();
-        updateMonthlyHistory();
-        updateAllTimeHistory();
     }
 
     // getters
@@ -166,9 +164,10 @@ public class Crypto {
         this.volumePercent = volumePercent;
     }
 
+    // calls the api to receive relevant data for this crypto and updates respective fields
     private void updateData() {
         // create the url for the endpoint and call the api using it
-        String endpoint = "https://apiv2.bitcoinaverage.com/indices/global/ticker/" + getPriceSymbol();
+        String endpoint = BASE_URL + "ticker/" + getPriceSymbol();
         String apiResponse = Api.fetch(endpoint);
 
         // parse the JSON data received from the api
@@ -200,7 +199,6 @@ public class Crypto {
                 averages.updateData(obj.getJSONObject("averages"));
             if (obj.has("changes")) {
                 JSONObject changes = obj.getJSONObject("changes");
-
                 if (changes.has("price"))
                     priceChanges.updateData(changes.getJSONObject("price"));
                 if (changes.has("percent"))
@@ -213,96 +211,97 @@ public class Crypto {
         }
     }
 
-    public void updateDailyHistory(){
+    /*
+     * returns an immutable list of the daily per minute daily sliding window
+     */
+    public List<HistoricalData> getDailyHistory(){
         // create the url for the endpoint and call the api using it
-        String endpoint = "https://apiv2.bitcoinaverage.com/indices/global/history/" + getPriceSymbol() + "?period=daily&?format=json";
+        String endpoint = BASE_URL + "history/" + getPriceSymbol() + "?period=daily&?format=json";
         String apiResponse = Api.fetch(endpoint);
 
         try {
-            dailyHistory.clear(); //removes all old stuff from arraylist
+            // remove any previous data stored in the list
+            dailyHistory.clear();
 
             JSONArray arr = new JSONArray(apiResponse);
-
             for (int i = 0; i < arr.length(); ++i) {
                 JSONObject rec = arr.getJSONObject(i);
-
                 if(rec.has("time") && rec.has("average")){
-
-                    // Get avg and time from obj into local variables
                     String time = rec.getString("time");
                     double avg = rec.getDouble("average");
-
-                    // Add to dailyHistory arraylist
                     dailyHistory.add(new HistoricalData(time, avg));
                 }
             }
         }
-        catch (Exception e) {
+        catch (JSONException e) {
+            System.out.println("JSONException: Crypto.getDailyHistory()");
             e.printStackTrace();
         }
+        return Collections.unmodifiableList(dailyHistory);
     }
 
-    public void updateMonthlyHistory(){
+    /*
+     * returns an immutable list of the monthly per hour monthly sliding window
+     */
+    public List<HistoricalData> getMonthlyHistory(){
         // create the url for the endpoint and call the api using it
-        String endpoint = "https://apiv2.bitcoinaverage.com/indices/global/history/" + getPriceSymbol() + "?period=monthly&?format=json";
+        String endpoint = BASE_URL + "history/" + getPriceSymbol() + "?period=monthly&?format=json";
         String apiResponse = Api.fetch(endpoint);
 
         try {
-            monthlyHistory.clear(); //removes all old stuff from arraylist
+            // remove any previous data stored in the list
+            monthlyHistory.clear();
 
             JSONArray arr = new JSONArray(apiResponse);
-
             for (int i = 0; i < arr.length(); ++i) {
                 JSONObject rec = arr.getJSONObject(i);
-
                 if(rec.has("time") && rec.has("average") && rec.has("low") && rec.has("open") && rec.has("high")){
-
-                    // Get data from obj into local variables
                     String time = rec.getString("time");
                     double avg = rec.getDouble("average");
                     double low = rec.getDouble("low");
                     double high = rec.getDouble("high");
                     double open = rec.getDouble("open");
 
-
-                    // Add to dailyHistory arraylist
                     monthlyHistory.add(new HistoricalData(time, avg, low, high, open));
                 }
             }
         }
-        catch (Exception e) {
+        catch (JSONException e) {
+            System.out.println("JSONException: Crypto.getMonthlyHistory()");
             e.printStackTrace();
         }
+        return Collections.unmodifiableList(monthlyHistory);
     }
 
-    public void updateAllTimeHistory(){
+    /*
+     * returns an immutable list of the alltime - per day all time history (default value)
+     */
+    public List<HistoricalData> getAllTimeHistory(){
         // create the url for the endpoint and call the api using it
-        String endpoint = "https://apiv2.bitcoinaverage.com/indices/global/history/" + getPriceSymbol() + "?period=alltime&?format=json";
+        String endpoint = BASE_URL + "history/" + getPriceSymbol() + "?period=alltime&?format=json";
         String apiResponse = Api.fetch(endpoint);
 
         try {
-            alltimeHistory.clear(); //removes all old stuff from arraylist
+            // remove any previous data stored in the list
+            allTimeHistory.clear();
 
             JSONArray arr = new JSONArray(apiResponse);
-
             for (int i = 0; i < arr.length(); ++i) {
                 JSONObject rec = arr.getJSONObject(i);
-
                 if(rec.has("time") && rec.has("average") && rec.has("volume")){
-
-                    // Get avg and time from obj into local variables
                     String time = rec.getString("time");
                     double avg = rec.getDouble("average");
                     double volume = rec.getDouble("volume");
 
-                    // Add to dailyHistory arraylist
-                    alltimeHistory.add(new HistoricalData(time, avg, volume));
+                    allTimeHistory.add(new HistoricalData(time, avg, volume));
                 }
             }
         }
-        catch (Exception e) {
+        catch (JSONException e) {
+            System.out.println("JSONException: Crypto.getAllTimeHistory()");
             e.printStackTrace();
         }
+        return Collections.unmodifiableList(monthlyHistory);
     }
 
     @Override

@@ -1,30 +1,9 @@
 /*
  * HistoricalData.java
  * Object class to model all possible historical data values received by an API
- * test
  */
 
 public class HistoricalData {
-    /*
-        Daily
-        "time": "2018-10-07 15:03:00",
-        "average": 6557.02
-
-        Monthly
-        "low": 7287.23,
-        "open": 7315.80,
-        "average": 7300.24,
-        "time": "2018-09-03 20:00:00",
-        "high": 7315.80
-
-        Alltime
-        "open": "",
-        "time": "2010-07-17 00:00:00",
-        "volume": 20.0,
-        "low": "",
-        "average": 0.05,
-        "high": ""
-     */
     private String type;
     private String time;
     private double volume;
@@ -114,5 +93,30 @@ public class HistoricalData {
 
     public void setAverage(double average) {
         this.average = average;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Time: " + getTime());
+        sb.append("\n");
+        sb.append("Average: " + getAverage());
+        sb.append("\n");
+
+        if (getType().equals("ALLTIME")) {
+            sb.append("Volume: " + getVolume());
+            sb.append("\n");
+        }
+        else if (getType().equals("MONTHLY")) {
+            sb.append("Low: " + getLow());
+            sb.append("\n");
+            sb.append("High: " + getHigh());
+            sb.append("\n");
+            sb.append("Open: " + getOpen());
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 }

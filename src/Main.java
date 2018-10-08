@@ -26,14 +26,16 @@ REFERENCES USED
     http://roufid.com/5-ways-convert-inputstream-string-java/
 */
 
+import java.util.List;
+
 public class Main {
 
     public static void main(String[] args) {
         Crypto bitcoinUS = new Crypto("BTCUSD");
-//        Crypto litecoinUS = new Crypto("LTCUSD");
-//
-//        System.out.println(bitcoinUS.toString());
-//        System.out.println();
-//        System.out.println(litecoinUS.toString());
+        Crypto litecoinUS = new Crypto("LTCUSD");
+
+        System.out.println(bitcoinUS.toString());
+        System.out.println();
+        System.out.println(litecoinUS.toString());
     }
 }

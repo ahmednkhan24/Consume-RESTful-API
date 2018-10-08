@@ -17,8 +17,11 @@
  *      Saudi Riyal       - SAR
  */
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class Crypto {
     private String rawJson;
@@ -36,6 +39,10 @@ public class Crypto {
     private DateData averages;
     private DateData priceChanges;
     private DateData percentChanges;
+    private ArrayList <HistoricalData> dailyHistory;
+    private ArrayList <HistoricalData> monthlyHistory;
+    private ArrayList <HistoricalData> alltimeHistory;
+
 
     public Crypto(String priceSymbol) {
         this.priceSymbol = priceSymbol;
@@ -45,8 +52,15 @@ public class Crypto {
         averages = new DateData();
         priceChanges = new DateData();
         percentChanges = new DateData();
+        dailyHistory = new ArrayList<HistoricalData>();
+        monthlyHistory = new ArrayList<HistoricalData>();
+        alltimeHistory = new ArrayList<HistoricalData>();
 
+        //TODO DELETE ME LATTER
         updateData();
+        updateDailyHistory();
+        updateMonthlyHistory();
+        updateAllTimeHistory();
     }
 
     // getters
@@ -195,6 +209,98 @@ public class Crypto {
         }
         catch (JSONException e) {
             System.out.println("JSONException: Crypto.parseData()");
+            e.printStackTrace();
+        }
+    }
+
+    public void updateDailyHistory(){
+        // create the url for the endpoint and call the api using it
+        String endpoint = "https://apiv2.bitcoinaverage.com/indices/global/history/" + getPriceSymbol() + "?period=daily&?format=json";
+        String apiResponse = Api.fetch(endpoint);
+
+        try {
+            dailyHistory.clear(); //removes all old stuff from arraylist
+
+            JSONArray arr = new JSONArray(apiResponse);
+
+            for (int i = 0; i < arr.length(); ++i) {
+                JSONObject rec = arr.getJSONObject(i);
+
+                if(rec.has("time") && rec.has("average")){
+
+                    // Get avg and time from obj into local variables
+                    String time = rec.getString("time");
+                    double avg = rec.getDouble("average");
+
+                    // Add to dailyHistory arraylist
+                    dailyHistory.add(new HistoricalData(time, avg));
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateMonthlyHistory(){
+        // create the url for the endpoint and call the api using it
+        String endpoint = "https://apiv2.bitcoinaverage.com/indices/global/history/" + getPriceSymbol() + "?period=monthly&?format=json";
+        String apiResponse = Api.fetch(endpoint);
+
+        try {
+            monthlyHistory.clear(); //removes all old stuff from arraylist
+
+            JSONArray arr = new JSONArray(apiResponse);
+
+            for (int i = 0; i < arr.length(); ++i) {
+                JSONObject rec = arr.getJSONObject(i);
+
+                if(rec.has("time") && rec.has("average") && rec.has("low") && rec.has("open") && rec.has("high")){
+
+                    // Get data from obj into local variables
+                    String time = rec.getString("time");
+                    double avg = rec.getDouble("average");
+                    double low = rec.getDouble("low");
+                    double high = rec.getDouble("high");
+                    double open = rec.getDouble("open");
+
+
+                    // Add to dailyHistory arraylist
+                    monthlyHistory.add(new HistoricalData(time, avg, low, high, open));
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateAllTimeHistory(){
+        // create the url for the endpoint and call the api using it
+        String endpoint = "https://apiv2.bitcoinaverage.com/indices/global/history/" + getPriceSymbol() + "?period=alltime&?format=json";
+        String apiResponse = Api.fetch(endpoint);
+
+        try {
+            alltimeHistory.clear(); //removes all old stuff from arraylist
+
+            JSONArray arr = new JSONArray(apiResponse);
+
+            for (int i = 0; i < arr.length(); ++i) {
+                JSONObject rec = arr.getJSONObject(i);
+
+                if(rec.has("time") && rec.has("average") && rec.has("volume")){
+
+                    // Get avg and time from obj into local variables
+                    String time = rec.getString("time");
+                    double avg = rec.getDouble("average");
+                    double volume = rec.getDouble("volume");
+
+                    // Add to dailyHistory arraylist
+                    alltimeHistory.add(new HistoricalData(time, avg, volume));
+                }
+            }
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }

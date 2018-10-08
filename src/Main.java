@@ -30,10 +30,10 @@ public class Main {
 
     public static void main(String[] args) {
         Crypto bitcoinUS = new Crypto("BTCUSD");
-        Crypto litecoinUS = new Crypto("LTCUSD");
-
-        System.out.println(bitcoinUS.toString());
-        System.out.println();
-        System.out.println(litecoinUS.toString());
+//        Crypto litecoinUS = new Crypto("LTCUSD");
+//
+//        System.out.println(bitcoinUS.toString());
+//        System.out.println();
+//        System.out.println(litecoinUS.toString());
     }
 }

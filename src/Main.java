@@ -7,6 +7,11 @@ REFERENCES USED
     BitCoin API that I haven't used yet - this is what Alex sent
     https://www.cryptocompare.com/api/#-api-data-price-
 
+    News API used
+    https://newsapi.org/
+
+    news api key = f313ec1010e145cab7730034d0c6baf5
+
     Calling an API in Java
     https://www.mkyong.com/webservices/jax-rs/restfull-java-client-with-java-net-url/
 
@@ -24,10 +29,9 @@ REFERENCES USED
 
     Convert input stream to string in Java
     http://roufid.com/5-ways-convert-inputstream-string-java/
-
-    news api key = f313ec1010e145cab7730034d0c6baf5
 */
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -37,10 +41,24 @@ public class Main {
         System.out.println(bitCoinUS.toString());
         System.out.println();
 
-        List<HistoricalData> daily   = bitCoinUS.getDailyHistory();
-        System.out.println(daily.get(0).getTime());
-
-//        List<HistoricalData> monthly = bitcoinUS.getMonthlyHistory();
-//        List<HistoricalData> alltime = bitcoinUS.getAllTimeHistory();
+//        List<HistoricalData> daily = bitCoinUS.getDailyHistory();
+//        for (HistoricalData d : daily)
+//            System.out.println(d.toString());
+//        System.out.println(daily.size());
+//
+//        List<HistoricalData> monthly = bitCoinUS.getMonthlyHistory();
+//        for (HistoricalData d : monthly)
+//            System.out.println(d.toString());
+//        System.out.println(monthly.size());
+//
+//        List<HistoricalData> alltime = bitCoinUS.getAllTimeHistory();
+//        for (HistoricalData d : alltime)
+//            System.out.println(d.toString());
+//        System.out.println(alltime.size());
+//
+//        List<NewsData> articles = bitCoinUS.relevantArticles();
+//        for (NewsData a : articles)
+//            System.out.println(a.toString());
+//        System.out.println(articles.size());
     }
 }

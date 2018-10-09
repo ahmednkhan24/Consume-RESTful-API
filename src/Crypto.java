@@ -41,9 +41,10 @@ public class Crypto {
     private DateData averages;
     private DateData priceChanges;
     private DateData percentChanges;
-    private ArrayList <HistoricalData> dailyHistory;
-    private ArrayList <HistoricalData> monthlyHistory;
-    private ArrayList <HistoricalData> allTimeHistory;
+    private ArrayList<HistoricalData> dailyHistory;
+    private ArrayList<HistoricalData> monthlyHistory;
+    private ArrayList<HistoricalData> allTimeHistory;
+    private ArrayList<NewsData> articles;
 
     // constructor
     public Crypto(String priceSymbol) {
@@ -54,9 +55,10 @@ public class Crypto {
         averages       = new DateData();
         priceChanges   = new DateData();
         percentChanges = new DateData();
-        dailyHistory   = new ArrayList<HistoricalData>();
-        monthlyHistory = new ArrayList<HistoricalData>();
-        allTimeHistory = new ArrayList<HistoricalData>();
+        dailyHistory   = new ArrayList<>();
+        monthlyHistory = new ArrayList<>();
+        allTimeHistory = new ArrayList<>();
+        articles       = new ArrayList<>();
 
         updateData();
     }
@@ -250,6 +252,54 @@ public class Crypto {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public List<NewsData> relevantArticles() {
+        // https://newsapi.org/v2/everything?q=cryptocurrency&sortBy=publishedAt&apiKey=f313ec1010e145cab7730034d0c6baf5
+
+        String base_url = "https://newsapi.org/v2/everything?";
+        String q        = "q=cryptocurrency";
+        String sortBy   = "&sortBy=publishedAt";
+        String apiKey   = "&apiKey=f313ec1010e145cab7730034d0c6baf5";
+
+        // create the url for the endpoint and call the api using it
+        String endpoint = base_url + q + sortBy + apiKey;
+        String apiResponse = Api.fetch(endpoint);
+
+        try {
+            JSONObject ok = new JSONObject(apiResponse);
+            JSONArray arr = ok.getJSONArray("articles");
+
+            articles.clear();
+            for (int i = 0; i < arr.length(); ++i) {
+                JSONObject obj = arr.getJSONObject(i);
+
+                String author, title, desc, url, image, published, content;
+                author = title = desc = url = image = published = content = null;
+
+                if (obj.has("author") && obj.get("author") instanceof String)
+                    author = obj.getString("author");
+                if (obj.has("title") && obj.get("title") instanceof String)
+                    title = obj.getString("title");
+                if (obj.has("description") && obj.get("description") instanceof String)
+                    desc = obj.getString("description");
+                if (obj.has("url") && obj.get("url") instanceof String)
+                    url = obj.getString("url");
+                if (obj.has("urlToImage") && obj.get("urlToImage") instanceof String)
+                    image = obj.getString("urlToImage");
+                if (obj.has("publishedAt") && obj.get("publishedAt") instanceof String)
+                    published = obj.getString("publishedAt");
+                if (obj.has("content") && obj.get("content") instanceof String)
+                    content = obj.getString("content");
+
+                if (author != null && title != null && desc != null && url != null && image != null && published != null && content != null) {
+                    articles.add(new NewsData(author, title, desc, url, image, published, content));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return Collections.unmodifiableList(articles);
     }
 
     @Override

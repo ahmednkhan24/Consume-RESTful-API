@@ -66,35 +66,6 @@ public class HistoricalData {
         return average;
     }
 
-    // setters
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public void setVolume(double volume) {
-        this.volume = volume;
-    }
-
-    public void setLow(double low) {
-        this.low = low;
-    }
-
-    public void setHigh(double high) {
-        this.high = high;
-    }
-
-    public void setOpen(double open) {
-        this.open = open;
-    }
-
-    public void setAverage(double average) {
-        this.average = average;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

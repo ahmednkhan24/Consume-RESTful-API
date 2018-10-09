@@ -61,8 +61,73 @@ public class Crypto {
         updateData();
     }
 
+    // getters
+    public String getPriceSymbol() {
+        return priceSymbol;
+    }
+
+    public String getDisplay_timestamp() {
+        return display_timestamp;
+    }
+
+    public double getAsk() {
+        return ask;
+    }
+
+    public double getBid() {
+        return bid;
+    }
+
+    public double getLast() {
+        return last;
+    }
+
+    public double getHigh() {
+        return high;
+    }
+
+    public double getLow() {
+        return low;
+    }
+
+    public double getVolume() {
+        return volume;
+    }
+
+    public double getVolumePercent() {
+        return volumePercent;
+    }
+
+    public DateData getOpen() {
+        return open;
+    }
+
+    public DateData getAverages() {
+        return averages;
+    }
+
+    public DateData getPriceChanges() {
+        return priceChanges;
+    }
+
+    public DateData getPercentChanges() {
+        return percentChanges;
+    }
+
+    public List<HistoricalData> getDailyHistory(){
+        return getHistory("daily");
+    }
+
+    public List<HistoricalData> getMonthlyHistory(){
+        return getHistory("monthly");
+    }
+
+    public List<HistoricalData> getAllTimeHistory(){
+        return getHistory("alltime");
+    }
+
     // calls the api to receive relevant data for this crypto and updates respective fields
-    private void updateData() {
+    public void updateData() {
         // create the url for the endpoint and call the api using it
         String endpoint = BASE_URL + "ticker/" + getPriceSymbol();
         String apiResponse = Api.fetch(endpoint);
@@ -70,27 +135,27 @@ public class Crypto {
         // parse the JSON data received from the api
         try {
             JSONObject obj = new JSONObject(apiResponse);
-            setRawJson(apiResponse);
+            this.rawJson = apiResponse;
 
             // check in case the API response does not contain the fields we are expecting, and extract the data from the JSON object
             if (obj.has("ask"))
-                setAsk(obj.getDouble("ask"));
+                this.ask = obj.getDouble("ask");
             if (obj.has("bid"))
-                setBid(obj.getDouble("bid"));
+                this.bid = obj.getDouble("bid");
             if (obj.has("last"))
-                setLast(obj.getDouble("last"));
+                this.last = obj.getDouble("last");
             if (obj.has("high"))
-                setHigh(obj.getDouble("high"));
+                this.high = obj.getDouble("high");
             if (obj.has("low"))
-                setLow(obj.getDouble("low"));
+                this.low = obj.getDouble("low");
             if (obj.has("volume"))
-                setVolume(obj.getDouble("volume"));
+                this.volume = obj.getDouble("volume");
             if (obj.has("volume_percent"))
-                setVolumePercent(obj.getDouble("volume_percent"));
+                this.volumePercent = obj.getDouble("volume_percent");
             if (obj.has("timestamp"))
-                setTimestamp(Double.toString(obj.getDouble("timestamp")));
+                this.timestamp = Double.toString(obj.getDouble("timestamp"));
             if (obj.has("display_timestamp"))
-                setDisplay_timestamp(obj.getString("display_timestamp"));
+                this.display_timestamp = obj.getString("display_timestamp");
             if (obj.has("open"))
                 open.updateData(obj.getJSONObject("open"));
             if (obj.has("averages"))
@@ -185,117 +250,6 @@ public class Crypto {
             e.printStackTrace();
         }
         return null;
-    }
-
-    // getters
-    public List<HistoricalData> getDailyHistory(){
-        return getHistory("daily");
-    }
-
-    public List<HistoricalData> getMonthlyHistory(){
-        return getHistory("monthly");
-    }
-
-    public List<HistoricalData> getAllTimeHistory(){
-        return getHistory("alltime");
-    }
-
-    public String getPriceSymbol() {
-        return priceSymbol;
-    }
-
-    public String getDisplay_timestamp() {
-        return display_timestamp;
-    }
-
-    public double getAsk() {
-        return ask;
-    }
-
-    public double getBid() {
-        return bid;
-    }
-
-    public double getLast() {
-        return last;
-    }
-
-    public double getHigh() {
-        return high;
-    }
-
-    public double getLow() {
-        return low;
-    }
-
-    public double getVolume() {
-        return volume;
-    }
-
-    public double getVolumePercent() {
-        return volumePercent;
-    }
-
-    public DateData getOpen() {
-        return open;
-    }
-
-    public DateData getAverages() {
-        return averages;
-    }
-
-    public DateData getPriceChanges() {
-        return priceChanges;
-    }
-
-    public DateData getPercentChanges() {
-        return percentChanges;
-    }
-
-    // setters
-    public void setRawJson(String rawJson) {
-        this.rawJson = rawJson;
-    }
-
-    public void setPriceSymbol(String priceSymbol) {
-        this.priceSymbol = priceSymbol.toUpperCase();
-        updateData();
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public void setDisplay_timestamp(String display_timestamp) {
-        this.display_timestamp = display_timestamp;
-    }
-
-    public void setAsk(double ask) {
-        this.ask = ask;
-    }
-
-    public void setBid(double bid) {
-        this.bid = bid;
-    }
-
-    public void setLast(double last) {
-        this.last = last;
-    }
-
-    public void setHigh(double high) {
-        this.high = high;
-    }
-
-    public void setLow(double low) {
-        this.low = low;
-    }
-
-    public void setVolume(double volume) {
-        this.volume = volume;
-    }
-
-    public void setVolumePercent(double volumePercent) {
-        this.volumePercent = volumePercent;
     }
 
     @Override

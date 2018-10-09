@@ -56,39 +56,6 @@ public class DateData {
         return isInDepth;
     }
 
-    // setters
-    public void setHour(double hour) {
-        this.hour = hour;
-    }
-
-    public void setDay(double day) {
-        this.day = day;
-    }
-
-    public void setWeek(double week) {
-        this.week = week;
-    }
-
-    public void setMonth(double month) {
-        this.month = month;
-    }
-
-    public void setMonth_3(double month_3) {
-        this.month_3 = month_3;
-    }
-
-    public void setMonth_6(double month_6) {
-        this.month_6 = month_6;
-    }
-
-    public void setYear(double year) {
-        this.year = year;
-    }
-
-    public void setInDepth(boolean inDepth) {
-        this.isInDepth = inDepth;
-    }
-
     /*
      * A DateData object can either be in-depth or not in-depth.
      *
@@ -97,26 +64,25 @@ public class DateData {
      */
     public void updateData(JSONObject obj) {
         try {
-            setInDepth(false);
+            this.isInDepth = false;
 
             if (obj.has("day")) {
-                setDay(obj.getDouble("day"));
-                setWeek(obj.getDouble("week"));
-                setMonth(obj.getDouble("month"));
+                this.day   = obj.getDouble("day");
+                this.week  = obj.getDouble("week");
+                this.month = obj.getDouble("month");
             }
 
             if (obj.has("hour")) {
-                setInDepth(true);
+                this.isInDepth = true;
 
-                setHour(obj.getDouble("hour"));
-                setMonth_3(obj.getDouble("month_3"));
-                setMonth_6(obj.getDouble("month_6"));
-                setYear(obj.getDouble("year"));
+                this.hour    = obj.getDouble("hour");
+                this.month_3 = obj.getDouble("month_3");
+                this.month_6 = obj.getDouble("month_6");
+                this.year    = obj.getDouble("year");
 
             }
         }
         catch (JSONException e) {
-            System.out.println("JSONException: DateData.updateData()");
             e.printStackTrace();
         }
     }

@@ -24,6 +24,8 @@ REFERENCES USED
 
     Convert input stream to string in Java
     http://roufid.com/5-ways-convert-inputstream-string-java/
+
+    news api key = f313ec1010e145cab7730034d0c6baf5
 */
 
 import java.util.List;
@@ -35,7 +37,9 @@ public class Main {
         System.out.println(bitCoinUS.toString());
         System.out.println();
 
-//        List<HistoricalData> daily   = bitcoinUS.getDailyHistory();
+        List<HistoricalData> daily   = bitCoinUS.getDailyHistory();
+        System.out.println(daily.get(0).getTime());
+
 //        List<HistoricalData> monthly = bitcoinUS.getMonthlyHistory();
 //        List<HistoricalData> alltime = bitcoinUS.getAllTimeHistory();
     }

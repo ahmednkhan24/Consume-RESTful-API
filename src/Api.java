@@ -38,10 +38,8 @@ public class Api {
             conn.disconnect();
 
         } catch (MalformedURLException e) {
-            System.out.println("MalformedURLException: Api.fetch()");
             e.printStackTrace();
         } catch (IOException e) {
-            System.out.println("IOException: Api.fetch()");
             e.printStackTrace();
         }
 

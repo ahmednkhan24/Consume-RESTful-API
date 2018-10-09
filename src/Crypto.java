@@ -45,25 +45,159 @@ public class Crypto {
     private ArrayList <HistoricalData> monthlyHistory;
     private ArrayList <HistoricalData> allTimeHistory;
 
-
+    // constructor
     public Crypto(String priceSymbol) {
         this.priceSymbol = priceSymbol;
 
         ask = bid = last = high = low = volume = volumePercent = 0;
-        open = new DateData();
-        averages = new DateData();
-        priceChanges = new DateData();
+        open           = new DateData();
+        averages       = new DateData();
+        priceChanges   = new DateData();
         percentChanges = new DateData();
-        dailyHistory = new ArrayList<HistoricalData>();
+        dailyHistory   = new ArrayList<HistoricalData>();
         monthlyHistory = new ArrayList<HistoricalData>();
         allTimeHistory = new ArrayList<HistoricalData>();
 
         updateData();
     }
 
+    // calls the api to receive relevant data for this crypto and updates respective fields
+    private void updateData() {
+        // create the url for the endpoint and call the api using it
+        String endpoint = BASE_URL + "ticker/" + getPriceSymbol();
+        String apiResponse = Api.fetch(endpoint);
+
+        // parse the JSON data received from the api
+        try {
+            JSONObject obj = new JSONObject(apiResponse);
+            setRawJson(apiResponse);
+
+            // check in case the API response does not contain the fields we are expecting, and extract the data from the JSON object
+            if (obj.has("ask"))
+                setAsk(obj.getDouble("ask"));
+            if (obj.has("bid"))
+                setBid(obj.getDouble("bid"));
+            if (obj.has("last"))
+                setLast(obj.getDouble("last"));
+            if (obj.has("high"))
+                setHigh(obj.getDouble("high"));
+            if (obj.has("low"))
+                setLow(obj.getDouble("low"));
+            if (obj.has("volume"))
+                setVolume(obj.getDouble("volume"));
+            if (obj.has("volume_percent"))
+                setVolumePercent(obj.getDouble("volume_percent"));
+            if (obj.has("timestamp"))
+                setTimestamp(Double.toString(obj.getDouble("timestamp")));
+            if (obj.has("display_timestamp"))
+                setDisplay_timestamp(obj.getString("display_timestamp"));
+            if (obj.has("open"))
+                open.updateData(obj.getJSONObject("open"));
+            if (obj.has("averages"))
+                averages.updateData(obj.getJSONObject("averages"));
+            if (obj.has("changes")) {
+                JSONObject changes = obj.getJSONObject("changes");
+                if (changes.has("price"))
+                    priceChanges.updateData(changes.getJSONObject("price"));
+                if (changes.has("percent"))
+                    percentChanges.updateData(changes.getJSONObject("percent"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+     * returns an immutable list of the:
+      * daily   - daily per minute daily sliding window
+      * monthly - monthly per hour monthly sliding window
+      * alltime - all time history (default value)
+     */
+    private List<HistoricalData> getHistory(String period){
+        // create the url for the endpoint and call the api using it
+        String endpoint = BASE_URL + "history/" + getPriceSymbol() + "?period=" + period + "&?format=json";
+        String apiResponse = Api.fetch(endpoint);
+
+        try {
+            JSONArray arr = new JSONArray(apiResponse);
+
+            if (period.equals("daily")) {
+                // remove any previous data stored in the list
+                dailyHistory.clear();
+
+                for (int i = 0; i < arr.length(); ++i) {
+                    JSONObject obj = arr.getJSONObject(i);
+
+                    // check in case the API response does not contain the fields we are expecting
+                    if(obj.has("time") && obj.has("average")) {
+
+                        // extract the data from the JSON object
+                        String time = obj.getString("time");
+                        double avg  = obj.getDouble("average");
+                        dailyHistory.add(new HistoricalData(time, avg));
+                    }
+                }
+                return Collections.unmodifiableList(dailyHistory);
+            }
+            else if (period.equals("monthly")) {
+                // remove any previous data stored in the list
+                monthlyHistory.clear();
+
+                for (int i = 0; i < arr.length(); ++i) {
+                    JSONObject obj = arr.getJSONObject(i);
+
+                    // check in case the API response does not contain the fields we are expecting
+                    if(obj.has("time") && obj.has("average") && obj.has("low") && obj.has("open") && obj.has("high")){
+
+                        // extract the data from the JSON object
+                        String time = obj.getString("time");
+                        double avg  = obj.getDouble("average");
+                        double low  = obj.getDouble("low");
+                        double high = obj.getDouble("high");
+                        double open = obj.getDouble("open");
+
+                        monthlyHistory.add(new HistoricalData(time, avg, low, high, open));
+                    }
+                }
+                return Collections.unmodifiableList(monthlyHistory);
+            }
+            else if (period.equals("alltime")) {
+                // remove any previous data stored in the list
+                allTimeHistory.clear();
+
+                for (int i = 0; i < arr.length(); ++i) {
+                    JSONObject obj = arr.getJSONObject(i);
+
+                    // check in case the API response does not contain the fields we are expecting
+                    if(obj.has("time") && obj.has("average") && obj.has("volume")) {
+
+                        // extract the data from the JSON object
+                        String time = obj.getString("time");
+                        double avg  = obj.getDouble("average");
+                        double vol  = obj.getDouble("volume");
+
+                        allTimeHistory.add(new HistoricalData(time, avg, vol));
+                    }
+                }
+                return Collections.unmodifiableList(allTimeHistory);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     // getters
-    public String getRawJson() {
-        return rawJson;
+    public List<HistoricalData> getDailyHistory(){
+        return getHistory("daily");
+    }
+
+    public List<HistoricalData> getMonthlyHistory(){
+        return getHistory("monthly");
+    }
+
+    public List<HistoricalData> getAllTimeHistory(){
+        return getHistory("alltime");
     }
 
     public String getPriceSymbol() {
@@ -162,146 +296,6 @@ public class Crypto {
 
     public void setVolumePercent(double volumePercent) {
         this.volumePercent = volumePercent;
-    }
-
-    // calls the api to receive relevant data for this crypto and updates respective fields
-    private void updateData() {
-        // create the url for the endpoint and call the api using it
-        String endpoint = BASE_URL + "ticker/" + getPriceSymbol();
-        String apiResponse = Api.fetch(endpoint);
-
-        // parse the JSON data received from the api
-        try {
-            JSONObject obj = new JSONObject(apiResponse);
-            setRawJson(apiResponse);
-
-            if (obj.has("ask"))
-                setAsk(obj.getDouble("ask"));
-            if (obj.has("bid"))
-                setBid(obj.getDouble("bid"));
-            if (obj.has("last"))
-                setLast(obj.getDouble("last"));
-            if (obj.has("high"))
-                setHigh(obj.getDouble("high"));
-            if (obj.has("low"))
-                setLow(obj.getDouble("low"));
-            if (obj.has("volume"))
-                setVolume(obj.getDouble("volume"));
-            if (obj.has("volume_percent"))
-                setVolumePercent(obj.getDouble("volume_percent"));
-            if (obj.has("timestamp"))
-                setTimestamp(Double.toString(obj.getDouble("timestamp")));
-            if (obj.has("display_timestamp"))
-                setDisplay_timestamp(obj.getString("display_timestamp"));
-            if (obj.has("open"))
-                open.updateData(obj.getJSONObject("open"));
-            if (obj.has("averages"))
-                averages.updateData(obj.getJSONObject("averages"));
-            if (obj.has("changes")) {
-                JSONObject changes = obj.getJSONObject("changes");
-                if (changes.has("price"))
-                    priceChanges.updateData(changes.getJSONObject("price"));
-                if (changes.has("percent"))
-                    percentChanges.updateData(changes.getJSONObject("percent"));
-            }
-        }
-        catch (JSONException e) {
-            System.out.println("JSONException: Crypto.parseData()");
-            e.printStackTrace();
-        }
-    }
-
-    /*
-     * returns an immutable list of the daily per minute daily sliding window
-     */
-    public List<HistoricalData> getDailyHistory(){
-        // create the url for the endpoint and call the api using it
-        String endpoint = BASE_URL + "history/" + getPriceSymbol() + "?period=daily&?format=json";
-        String apiResponse = Api.fetch(endpoint);
-
-        try {
-            // remove any previous data stored in the list
-            dailyHistory.clear();
-
-            JSONArray arr = new JSONArray(apiResponse);
-            for (int i = 0; i < arr.length(); ++i) {
-                JSONObject rec = arr.getJSONObject(i);
-                if(rec.has("time") && rec.has("average")){
-                    String time = rec.getString("time");
-                    double avg = rec.getDouble("average");
-                    dailyHistory.add(new HistoricalData(time, avg));
-                }
-            }
-        }
-        catch (JSONException e) {
-            System.out.println("JSONException: Crypto.getDailyHistory()");
-            e.printStackTrace();
-        }
-        return Collections.unmodifiableList(dailyHistory);
-    }
-
-    /*
-     * returns an immutable list of the monthly per hour monthly sliding window
-     */
-    public List<HistoricalData> getMonthlyHistory(){
-        // create the url for the endpoint and call the api using it
-        String endpoint = BASE_URL + "history/" + getPriceSymbol() + "?period=monthly&?format=json";
-        String apiResponse = Api.fetch(endpoint);
-
-        try {
-            // remove any previous data stored in the list
-            monthlyHistory.clear();
-
-            JSONArray arr = new JSONArray(apiResponse);
-            for (int i = 0; i < arr.length(); ++i) {
-                JSONObject rec = arr.getJSONObject(i);
-                if(rec.has("time") && rec.has("average") && rec.has("low") && rec.has("open") && rec.has("high")){
-                    String time = rec.getString("time");
-                    double avg = rec.getDouble("average");
-                    double low = rec.getDouble("low");
-                    double high = rec.getDouble("high");
-                    double open = rec.getDouble("open");
-
-                    monthlyHistory.add(new HistoricalData(time, avg, low, high, open));
-                }
-            }
-        }
-        catch (JSONException e) {
-            System.out.println("JSONException: Crypto.getMonthlyHistory()");
-            e.printStackTrace();
-        }
-        return Collections.unmodifiableList(monthlyHistory);
-    }
-
-    /*
-     * returns an immutable list of the alltime - per day all time history (default value)
-     */
-    public List<HistoricalData> getAllTimeHistory(){
-        // create the url for the endpoint and call the api using it
-        String endpoint = BASE_URL + "history/" + getPriceSymbol() + "?period=alltime&?format=json";
-        String apiResponse = Api.fetch(endpoint);
-
-        try {
-            // remove any previous data stored in the list
-            allTimeHistory.clear();
-
-            JSONArray arr = new JSONArray(apiResponse);
-            for (int i = 0; i < arr.length(); ++i) {
-                JSONObject rec = arr.getJSONObject(i);
-                if(rec.has("time") && rec.has("average") && rec.has("volume")){
-                    String time = rec.getString("time");
-                    double avg = rec.getDouble("average");
-                    double volume = rec.getDouble("volume");
-
-                    allTimeHistory.add(new HistoricalData(time, avg, volume));
-                }
-            }
-        }
-        catch (JSONException e) {
-            System.out.println("JSONException: Crypto.getAllTimeHistory()");
-            e.printStackTrace();
-        }
-        return Collections.unmodifiableList(monthlyHistory);
     }
 
     @Override

@@ -31,11 +31,12 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        Crypto bitcoinUS = new Crypto("BTCUSD");
-        Crypto litecoinUS = new Crypto("LTCUSD");
-
-        System.out.println(bitcoinUS.toString());
+        Crypto bitCoinUS = new Crypto("BTCUSD");
+        System.out.println(bitCoinUS.toString());
         System.out.println();
-        System.out.println(litecoinUS.toString());
+
+//        List<HistoricalData> daily   = bitcoinUS.getDailyHistory();
+//        List<HistoricalData> monthly = bitcoinUS.getMonthlyHistory();
+//        List<HistoricalData> alltime = bitcoinUS.getAllTimeHistory();
     }
 }

@@ -41,6 +41,9 @@ public class Main {
         System.out.println(bitCoinUS.toString());
         System.out.println();
 
+        System.out.println(bitCoinUS.convert("AUD", 54));
+
+
 //        List<HistoricalData> daily = bitCoinUS.getDailyHistory();
 //        for (HistoricalData d : daily)
 //            System.out.println(d.toString());

@@ -20,9 +20,8 @@
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.*;
 
 public class Crypto {
     private static final String BASE_URL = "https://apiv2.bitcoinaverage.com/indices/global/";
@@ -45,6 +44,7 @@ public class Crypto {
     private ArrayList<HistoricalData> monthlyHistory;
     private ArrayList<HistoricalData> allTimeHistory;
     private ArrayList<NewsData> articles;
+    private HashMap<String, Double> exchangeRates;
 
     // constructor
     public Crypto(String priceSymbol) {
@@ -59,8 +59,10 @@ public class Crypto {
         monthlyHistory = new ArrayList<>();
         allTimeHistory = new ArrayList<>();
         articles       = new ArrayList<>();
+        exchangeRates  = new HashMap<>();
 
-        updateData();
+        updateCrypto();
+        updateExchangeRates();
     }
 
     // getters
@@ -129,7 +131,7 @@ public class Crypto {
     }
 
     // calls the api to receive relevant data for this crypto and updates respective fields
-    public void updateData() {
+    public void updateCrypto() {
         // create the url for the endpoint and call the api using it
         String endpoint = BASE_URL + "ticker/" + getPriceSymbol();
         String apiResponse = Api.fetch(endpoint);
@@ -267,8 +269,7 @@ public class Crypto {
         String apiResponse = Api.fetch(endpoint);
 
         try {
-            JSONObject ok = new JSONObject(apiResponse);
-            JSONArray arr = ok.getJSONArray("articles");
+            JSONArray arr = new JSONObject(apiResponse).getJSONArray("articles");
 
             articles.clear();
             for (int i = 0; i < arr.length(); ++i) {
@@ -300,6 +301,46 @@ public class Crypto {
             e.printStackTrace();
         }
         return Collections.unmodifiableList(articles);
+    }
+
+    // calls the api and populates the container with the current exchange rates of all currencies
+    private void updateExchangeRates() {
+        // create the url for the endpoint and call the api using it
+        String endpoint = "https://apiv2.bitcoinaverage.com/constants/exchangerates/global";
+        String apiResponse = Api.fetch(endpoint);
+
+        // parse the JSON data received from the api
+        try {
+            exchangeRates.clear();
+            JSONObject rates = new JSONObject(apiResponse).getJSONObject("rates");
+            Iterator<String> keys = rates.keys();
+
+            while(keys.hasNext()) {
+                String key = keys.next();
+                if (rates.get(key) instanceof JSONObject) {
+                    JSONObject obj = rates.getJSONObject(key);
+
+                    if (obj.has("rate")) {
+                        String currency = key;
+                        double rate = Double.parseDouble(obj.getString("rate"));
+                        exchangeRates.put(currency, rate);
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // takes a double value in AUD and a string to convert it to, like GBP
+    public double convert(String exchangeRate, double value) {
+        if (!exchangeRates.containsKey(exchangeRate))
+            return -1;
+        String currency  = getPriceSymbol().substring(3, 6);
+        double currencyValue = exchangeRates.get(currency);
+        double rateValue = exchangeRates.get(exchangeRate);
+
+        return value / currencyValue * rateValue;
     }
 
     @Override
